@@ -1,0 +1,5 @@
+[package]
+name = "meibo"
+version = "0.1.0"
+authors = ["Yuuki Fujiwara <fujiwara2018@s.okayama-u.ac.jp>"]
+edition = "2018"
