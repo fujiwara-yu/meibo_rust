@@ -139,7 +139,7 @@ fn exec_command(cmd :char, param :&str, profile_list: &mut Vec<Profile>){
 }
 
 fn parse_line(s: &str, profile_list: &mut Vec<Profile>) {
-  let v: Vec<_> = s.split(" ").collect();
+  let v: Vec<_> = s.splitn(2, " ").collect();
   if v[0].starts_with('%') {
     let cmd: char = v[0].chars().nth(1).unwrap();
     if v.len() == 1 {
