@@ -2,6 +2,7 @@ use std::io;
 use std::io::{BufRead, BufReader, Write};
 use std::fs::File;
 use std::path::Path;
+use std::num::ParseIntError;
 
 struct Profile {
   id: i32,
@@ -28,7 +29,7 @@ impl Profile {
 
 fn new_profile(line: &str, profile_list: &mut Vec<Profile>) {
   let profile: Vec<_> = line.split(',').collect();
-  if (profile.len() == 5){
+  if profile.len() == 5 {
     let p = Profile {
       id: profile[0].parse().unwrap(),
       name: profile[1].to_string(),
@@ -51,17 +52,27 @@ fn cmd_check(len: usize){
   println!("{} profile(s)", len); 
 }
 
-fn cmd_print(n: i32, profile_list: &mut Vec<Profile>) {
-  if (profile_list.len() < n.abs() as usize) {
+fn cmd_print(param: Result<i32, ParseIntError>, profile_list: &mut Vec<Profile>) {
+  let n = match param {
+    Ok(x) => {
+      x
+    },
+    Err(_) => {
+      println!("format error");
+      return;
+    }
+  };
+
+  if profile_list.len() < n.abs() as usize {
     println!("over");
     return
   }
 
-  if (n == 0){
+  if n == 0 {
    for profile in profile_list {
      profile.print_profile();
    }
-  } else if (n > 0){
+  } else if n > 0 {
     for profile in profile_list.iter().take(n as usize) {
       profile.print_profile();
     }
@@ -75,7 +86,7 @@ fn cmd_print(n: i32, profile_list: &mut Vec<Profile>) {
 
 fn cmd_read(filename: &str, profile_list: &mut Vec<Profile>) {
   let is_file_exist: bool = Path::new(filename).exists();
-  if (is_file_exist == false) {
+  if is_file_exist == false {
     return
   }
 
@@ -97,7 +108,7 @@ fn cmd_write(filename: &str, profile_list: &mut Vec<Profile>) {
 fn cmd_find(param: &str, profile_list: &mut Vec<Profile>) {
   let word = param.to_string();
   for profile in profile_list {
-    if (profile.id.to_string() == word || profile.name == word || profile.date == word || profile.home == word || profile.comment == word) {
+    if profile.id.to_string() == word || profile.name == word || profile.date == word || profile.home == word || profile.comment == word {
       profile.print_profile();
     }
   }
@@ -118,7 +129,7 @@ fn exec_command(cmd :char, param :&str, profile_list: &mut Vec<Profile>){
   match cmd {
     'Q' => cmd_quit(),
     'C' => cmd_check(profile_list.len()),
-    'P' => cmd_print(param.parse().unwrap(), profile_list),
+    'P' => cmd_print(param.parse(), profile_list),
     'R' => cmd_read(param, profile_list),
     'W' => cmd_write(param, profile_list),
     'F' => cmd_find(param, profile_list),
@@ -129,9 +140,9 @@ fn exec_command(cmd :char, param :&str, profile_list: &mut Vec<Profile>){
 
 fn parse_line(s: &str, profile_list: &mut Vec<Profile>) {
   let v: Vec<_> = s.split(" ").collect();
-  if (v[0].starts_with('%')){
+  if v[0].starts_with('%') {
     let cmd: char = v[0].chars().nth(1).unwrap();
-    if (v.len() == 1){
+    if v.len() == 1 {
       exec_command(cmd, "0", profile_list);
     } else {
       exec_command(cmd, v[1], profile_list);
